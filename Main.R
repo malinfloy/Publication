@@ -23,7 +23,7 @@ mydata <- read_csv("Masters_data_ver2.csv", col_names = TRUE)|>
 # find the 4 outliers, remove them (above)
 subset_above40speed <- mydata[which(mydata$Head.speed.moving > 40),]
 
- 
+
 ################################################################################
 ### CORRELATION MATRIX
 
