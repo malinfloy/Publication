@@ -417,7 +417,7 @@ all_as_glm <- glmer(sqrt(Normalized_Time.moving) ~ AS * Treatment + (1|Fish_ID) 
 
 all_as_lmer <- lmer(sqrt(Normalized_Time.moving) ~ AS * Treatment + (1|Fish_ID) + (1|Aquarium) , na.action=na.omit,data = mydata)
 
-summary(all_as_glm)
+summary(all_as_glm) 
 summary(all_as_lmer)
 
 ### EMMEANS for activity and as
