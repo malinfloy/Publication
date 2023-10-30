@@ -1,4 +1,4 @@
-# Import and exploration of data
+# Import and exploration of all data
 
 ###### IMPORT DATA - METABOLIC RATES, ACTIVITY, HARVESTING
 # Metabolic rates
