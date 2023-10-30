@@ -35,7 +35,7 @@ library(corrplot)
 library(patchwork)
 library(psych)
 
-## make wide to show all 3 trials in activity
+## make wide to show all 3 trials in activity, split between metabolic rates(mr) and activity
 # subset mr and make wide
 mydata_mr <- mydata |> 
   select(-c(1,6:11,13:17,28,29,33:35)) |> 
@@ -49,10 +49,10 @@ mydata_elise <- mydata |>
   pivot_wider(names_from = c(Trial, Treatment), values_from = Head.time.moving)
 
 
-# left_join to combine them into one wide format
+# left_join to combine them into one wide format, rename for better readbility in plot!
 mydata_wide <- left_join( mydata_elise, mydata_mr,by = "Fish_ID") |> 
   select(-matches(paste(c("code", "sex","Harvested","Aquarium","speed", "FSR", "Status", 
-                          "Weight","end","start","mghg","32","AS_Recovery","scaled_recovery")))) |> 
+                          "Weight","end","start","mghg","32","AS_Recovery","scaled_recovery")))) |>                                              
   rename(
     SMR_N = "SMR_scaled_Normoxia",
     SMR_H = "SMR_scaled_Hypoxia",
@@ -72,7 +72,7 @@ mydata_wide <- left_join( mydata_elise, mydata_mr,by = "Fish_ID") |>
 
 
 
-# subset by acclimation
+# subset by acclimation - Normoxia or hypoxia acclimated
 mydata_h <- filter(mydata_wide, Acclimation == "Hypoxia acclimated") |> 
   select(-c(Fish_ID,Acclimation))
 
@@ -82,33 +82,32 @@ mydata_n <- filter(mydata_wide, Acclimation == "Normoxia acclimated") |>
 
 # Correlation in normoxia acclimated fish
 cor_norm <- cor(mydata_n, use = "pairwise.complete.obs")
-p1_cor <- cor_pmat(cor_norm)
 cor_norm_plot1 <- ggcorrplot(cor_norm, type="lower",
                             title = "non acclimated", lab = T)
+cor_norm_plot1
 
 # Correlation in hypoxia acclimated fish
 cor_hypo <- cor(mydata_h, use = "pairwise.complete.obs")
-p2_cor <- cor_pmat(cor_norm)
 cor_hypo_plot2 <- ggcorrplot(cor_hypo, type="lower", lab = T,
                              title = "hypoxia acclimated")
+cor_hypo_plot2
 
 cor_norm_plot1|cor_hypo_plot2
 
-hist(mydata_cleaned$Normalized.moving.cleaned)
 
+# If you want to check specific variables, deeper dive from the correlation plots
 
-# check two variables - deeper dive
 mydata_n<-subset(mydata_n,moving_R3<0.15)
 
 formula <- y ~ x
-sp3 <- ggscatter(mydata_n, x = "moving_H2", y = "moving_H1",
+sp1 <- ggscatter(mydata_n, x = "moving_H2", y = "moving_H1",
                  add = "reg.line",  # Add regressin line
                  add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
                  conf.int = F, xlab = "moving_H2", ylab = "moving_H1", 
                  ggtheme = theme_classic()) +
   stat_regline_equation(
     aes(label =  paste(..eq.label.., ..adj.rr.label.., sep = "~~~~")),formula = formula)
-sp3
+sp1
 
 
 

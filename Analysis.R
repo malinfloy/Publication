@@ -1,8 +1,8 @@
 ################################################################################
 ### STATISTICAL ANALYSES
 
-# 1) Is there a relationship between treatment, acclimation with: metabolic rates, activity?
-# 2) Can activity explain why my SMR is lower in hypoxia treatment regardless of acclimation?
+# 1) Is there a relationship between treatment, acclimation with: metabolic rates and activity?
+# 2) Can activity explain why the SMR is lower in acute hypoxia treatment regardless of acclimation?
 
 #set normoxia as reference level
 mydata$Treatment <- factor(mydata$Treatment, levels = c("Normoxia", "Hypoxia","Recovery"))
@@ -27,7 +27,11 @@ hist(sqrt(mydata$SMR_scaled))
 hist(log(mydata$SMR_scaled))
 
 
-# Testing the AIC for different variables of interest
+## Testing the AIC for different variables of interest - not all shown ##
+# If failed to converge
+ctrl <- glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+
+# Model testing
 smr_glm0 <- glmer(SMR_scaled ~ Treatment+Acclimation + (1|Fish_ID) + (1|Aquarium) , na.action=na.omit, family = "gaussian",data = mydata)
 
 smr_glm1 <- glmer(SMR_scaled ~ Treatment+Acclimation*Sex+(1|Fish_ID) + (1|Aquarium) , na.action=na.omit, family = "gaussian",data = mydata)
@@ -47,10 +51,6 @@ smr_glm7 <- glmer(SMR_scaled ~ Treatment+Acclimation*Sex+SGR+(1|Fish_ID) + (1|Aq
 smr_glm8 <- glmer(SMR_scaled ~ Treatment+Acclimation*Sex+Length_end+(1|Fish_ID) + (1|Aquarium) , na.action=na.omit, family = "gaussian",data = mydata)
 
 
-# If failed to converge
-ctrl <- glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
-
-
 ### To see all the AIC together, and find the lowest AIC
 # List of models
 model_smr <- list(smr_glm0, smr_glm1, smr_glm2, smr_glm3, smr_glm4, smr_glm5,smr_glm6,smr_glm7,smr_glm8)
@@ -67,7 +67,7 @@ smr_glm <- glmer(SMR_scaled ~ Treatment*Acclimation*Sex+(1|Fish_ID) + (1|Aquariu
 smr_lmer <- lmer(SMR_scaled ~ Treatment * Acclimation * Sex + (1 | Fish_ID) + (1 | Aquarium), data = mydata, na.action = na.omit)
 
 
-# test by making variables a factor
+# test by making variables a factor 
 as.factor(mydata$Treatment)
 as.factor(mydata$Acclimation)
 as.factor(mydata$Sex) # changed nothing
@@ -148,8 +148,8 @@ mmr_lmer <- lmer(MMR_scaled ~ Treatment+Acclimation+Sex+(1|Fish_ID) + (1|Aquariu
 
 
 # Check residuals
-simulationOutput <- simulateResiduals(fittedModel = mmr_glm, plot = T)
-testOverdispersion(simulationOutput)
+simulationOutput1 <- simulateResiduals(fittedModel = mmr_glm, plot = T)
+testOverdispersion(simulationOutput1)
 
 qqnorm(resid(mmr_glm))
 summary(mmr_lmer)
@@ -228,9 +228,9 @@ moving_lmer <- lmer(sqrt(Normalized_Time.moving) ~ Treatment+Acclimation+Sex +(1
 
 
 #check residuals
-qqnorm(resid(moving_glm))
-simulationOutput1 <- simulateResiduals(fittedModel = moving_lmer, plot = T) 
-testOverdispersion(simulationOutput1)
+qqnorm(resid(moving_lmer))
+simulationOutput2 <- simulateResiduals(fittedModel = moving_lmer, plot = T) 
+testOverdispersion(simulationOutput2)
 
 summary(moving_lmer)
 
@@ -241,7 +241,7 @@ moving_emm <- emmeans(moving_grid, pairwise~Treatment|Acclimation, adjust = "non
 moving_emm
 
 # look within treatment
-pairs(moving_emm, simple = "Acclimation") # no sigificane...
+pairs(moving_emm, simple = "Acclimation") # no significance
 
 # table of models
 moving_table <- emmip(moving_glm,Acclimation~Treatment, CIs = TRUE, cov.reduce = range, type = "response", plotit = F) 
@@ -277,10 +277,10 @@ AIC(all_glm7)
 model_all <- list(all_glm1,all_glm2,all_glm3,all_glm4,all_glm5,all_glm6,all_glm7)
 
 # Calculate AIC for each model and store in a vector
-aic_values <- sapply(model_list, function(model) AIC(model))
+aic_values3 <- sapply(model_list, function(model) AIC(model))
 
 # Print AIC values and the best model
-aic_values
+aic_values3
 
 
 ### BEST MODEL ###
@@ -288,17 +288,17 @@ all_glm <- glmer(sqrt(Normalized_Time.moving) ~ SMR_scaled*MMR_scaled*Treatment 
 
 all_lmer <- lmer(sqrt(Normalized_Time.moving) ~ SMR_scaled*MMR_scaled*Treatment + Sex + (1|Fish_ID) + (1|Aquarium) , na.action=na.omit,data = mydata)
 
-AIC(all_glm)
+
 qqnorm(resid(all_glm))
 summary(all_glm)
 
 summary(all_lmer)
 
 # check residuals in mode
-simulationOutput <- simulateResiduals(fittedModel = all_lmer, plot = T)
-testOverdispersion(simulationOutput)
+simulationOutput3 <- simulateResiduals(fittedModel = all_lmer, plot = T)
+testOverdispersion(simulationOutput3)
 
-### EMMEANS for both
+### EMMEANS for activity and metabolic rates
 
 all_grid <- update(ref_grid(all_lmer, cov.reduce = range)) # Range show min and max values
 
@@ -343,10 +343,8 @@ as_glm5 <- glmer(AS ~ Treatment*Sex+Length_end+(1|Fish_ID) + (1|Aquarium) , na.a
 model_as <- list(as_glm,as_glm1,as_glm2,as_glm3,as_glm4,as_glm5)
 
 # Calculate AIC for each model and store in a vector
-aic_values <- sapply(model_as, function(model) AIC(model))
-
-# Print AIC values and the best model
-aic_values 
+aic_values4 <- sapply(model_as, function(model) AIC(model))
+aic_values4
 
 ### BEST MODEL ###
 as_glm<- glmer(AS ~ Treatment*Sex+(1|Fish_ID) + (1|Aquarium) , na.action=na.omit, family = "gaussian",data = mydata)
@@ -358,8 +356,8 @@ summary(as_glm)
 summary(as_lmer)
 
 # check residuals in mode
-simulationOutput <- simulateResiduals(fittedModel = as_glm, plot = T)
-testOverdispersion(simulationOutput)
+simulationOutput4 <- simulateResiduals(fittedModel = as_glm, plot = T)
+testOverdispersion(simulationOutput4)
 
 
 
@@ -404,14 +402,14 @@ all_as_glm7 <- glmer(sqrt(Normalized_Time.moving) ~ AS + Treatment + Sex + Lengt
 model_all_as <- list(all_as_glm0,all_as_glm1,all_as_glm2,all_as_glm3,all_as_glm4,all_as_glm5,all_as_glm6,all_as_glm7)
 
 # Calculate AIC for each model and store in a vector
-aic_values <- sapply(model_all_as, function(model) AIC(model))
+aic_values5 <- sapply(model_all_as, function(model) AIC(model))
 
-# Print AIC values and the best model
-aic_values
+# Print AIC values
+aic_values5
 
 # check residuals in mode
-simulationOutput <- simulateResiduals(fittedModel = all_as_glm1, plot = T)
-testOverdispersion(simulationOutput)
+simulationOutput5 <- simulateResiduals(fittedModel = all_as_glm1, plot = T)
+testOverdispersion(simulationOutput5)
 
 
 ### BEST MODEL ###
