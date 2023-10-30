@@ -2,7 +2,7 @@
 
 ###### IMPORT DATA - METABOLIC RATES, ACTIVITY, HARVESTING
 # Metabolic rates
-library(readxl)
+library(readxl) 
 library(tidyverse)
 
 MR_raw <- read_excel("C:/Users/malin/OneDrive - University of Bergen/MASTER  i Utvifysio/Master Thesis/Respirometry_coding/Raw_calculated_rates/All_phys_scaled_cleaned.xlsx") |> 
